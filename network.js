@@ -970,20 +970,18 @@ const Network = {
   // --- RATE LIMITED & STAGGERED PLAYER/AI STATE SYNCHRONIZATION ---
   _lastPlayerStateSent: 0,
   _playerStateInterval: 30, // ms (33 times/sec, more frequent)
+  _nextPlayerStateDue: 0, // monotonic timer for player state
   _lastAIStateSent: 0,
   _aiStateInterval: 50, // ms (20 times/sec, keep AI stable)
-  _staggerOffset: 15, // ms (player/AI offset, matches new player interval)
+  _nextAIStateDue: 0, // monotonic timer for AI state
 
   // Send player state to all connected peers, rate limited and staggered
   broadcastPlayerState(playerState) {
     const now = Date.now();
-    // Stagger: only send player state on even intervals, AI on odd intervals
-    if ((now % (this._playerStateInterval + this._staggerOffset)) < this._playerStateInterval) {
-      if (now - this._lastPlayerStateSent < this._playerStateInterval) return;
-      this._lastPlayerStateSent = now;
-    } else {
-      return;
-    }
+    // Monotonic timer: only send if due
+    if (now < this._nextPlayerStateDue) return;
+    this._lastPlayerStateSent = now;
+    this._nextPlayerStateDue = now + this._playerStateInterval;
     if (!this.isInitialized) return;
     const stateMessage = {
       type: 'player_state',
@@ -1027,13 +1025,10 @@ const Network = {
   // Send AI state to all connected peers, rate limited and staggered
   broadcastAIState(aiState) {
     const now = Date.now();
-    // Stagger: only send AI state on offset intervals
-    if ((now % (this._playerStateInterval + this._staggerOffset)) >= this._playerStateInterval) {
-      if (now - this._lastAIStateSent < this._aiStateInterval) return;
-      this._lastAIStateSent = now;
-    } else {
-      return;
-    }
+    // Monotonic timer: only send if due
+    if (now < this._nextAIStateDue) return;
+    this._lastAIStateSent = now;
+    this._nextAIStateDue = now + this._aiStateInterval;
     if (!this.isInitialized) return;
     const stateMessage = {
       type: 'ai_state',
