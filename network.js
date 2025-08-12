@@ -966,89 +966,111 @@ const Network = {
   },
 
   // --- PLAYER STATE SYNCHRONIZATION ---
-  
-  // Send player state to all connected peers
+
+  // --- RATE LIMITED & STAGGERED PLAYER/AI STATE SYNCHRONIZATION ---
+  _lastPlayerStateSent: 0,
+  _playerStateInterval: 50, // ms (20 times/sec)
+  _lastAIStateSent: 0,
+  _aiStateInterval: 50, // ms (20 times/sec)
+  _staggerOffset: 25, // ms (player/AI offset)
+
+  // Send player state to all connected peers, rate limited and staggered
   broadcastPlayerState(playerState) {
-    // Allow broadcasting as soon as we have any connections, not just when lobby is complete
-    if (!this.isInitialized) {
-      // Removed frequent broadcast initialization warning for performance
+    const now = Date.now();
+    // Stagger: only send player state on even intervals, AI on odd intervals
+    if ((now % (this._playerStateInterval + this._staggerOffset)) < this._playerStateInterval) {
+      if (now - this._lastPlayerStateSent < this._playerStateInterval) return;
+      this._lastPlayerStateSent = now;
+    } else {
       return;
     }
-    
+    if (!this.isInitialized) return;
     const stateMessage = {
       type: 'player_state',
       peerId: this.myPeerId,
       state: playerState,
-      timestamp: Date.now()
+      timestamp: now
     };
-    
     let totalSent = 0;
     let totalFailed = 0;
-    
-    // If we're the host, send to all connected clients (even if lobby isn't full)
     if (this.isBase && this.lobbyPeerConnections) {
       let sentCount = 0;
-      const connectionKeys = Object.keys(this.lobbyPeerConnections);
-      
-      if (this.callbacks.logChainEvent) {
-        this.callbacks.logChainEvent(`[Host] Broadcasting player state to ${connectionKeys.length} clients (lobby filling)`);
-      }
-      // Removed frequent host broadcast logging for performance
-      
       for (const [peerId, conn] of Object.entries(this.lobbyPeerConnections)) {
         if (conn && conn.open) {
           try {
             conn.send(stateMessage);
             sentCount++;
-            // Removed frequent successful send logging for performance
           } catch (error) {
-            // Removed frequent send failure logging for performance
             totalFailed++;
           }
         } else {
-          // Removed frequent connection status logging for performance
           totalFailed++;
         }
       }
-      
       totalSent += sentCount;
-      
-      if (this.callbacks.logChainEvent) {
-        this.callbacks.logChainEvent(`[Host] Sent player state to ${sentCount} clients`);
-      }
-      // Removed frequent broadcast summary logging for performance
-      
-      // Additional debugging if no clients received the message
-      if (sentCount === 0 && connectionKeys.length > 0) {
-        // Removed critical broadcast failure logging for performance
-        // Removed connection states debugging for performance
-      }
     }
-    
-    // If we're a client, send to host (even if lobby isn't full)
     if (!this.isBase) {
       const hostConnection = this.hostConn || this.baseConn;
       if (hostConnection && hostConnection.open) {
         try {
           hostConnection.send(stateMessage);
           totalSent++;
-          if (this.callbacks.logChainEvent) {
-            this.callbacks.logChainEvent(`[Client] Sent player state to host (lobby filling)`);
-          }
-          // Removed frequent client broadcast success logging for performance
         } catch (error) {
-          // Removed frequent client broadcast failure logging for performance
           totalFailed++;
         }
       } else {
-        // Removed frequent client connection status logging for performance
         totalFailed++;
       }
     }
-    
-    // Summary logging
-    if (totalSent === 0 && (this.isBase ? Object.keys(this.lobbyPeerConnections || {}).length > 0 : true)) {
-      // Removed frequent broadcast failure summary logging for performance
+  },
+
+  // Send AI state to all connected peers, rate limited and staggered
+  broadcastAIState(aiState) {
+    const now = Date.now();
+    // Stagger: only send AI state on offset intervals
+    if ((now % (this._playerStateInterval + this._staggerOffset)) >= this._playerStateInterval) {
+      if (now - this._lastAIStateSent < this._aiStateInterval) return;
+      this._lastAIStateSent = now;
+    } else {
+      return;
+    }
+    if (!this.isInitialized) return;
+    const stateMessage = {
+      type: 'ai_state',
+      peerId: this.myPeerId,
+      state: aiState,
+      timestamp: now
+    };
+    let totalSent = 0;
+    let totalFailed = 0;
+    if (this.isBase && this.lobbyPeerConnections) {
+      let sentCount = 0;
+      for (const [peerId, conn] of Object.entries(this.lobbyPeerConnections)) {
+        if (conn && conn.open) {
+          try {
+            conn.send(stateMessage);
+            sentCount++;
+          } catch (error) {
+            totalFailed++;
+          }
+        } else {
+          totalFailed++;
+        }
+      }
+      totalSent += sentCount;
+    }
+    if (!this.isBase) {
+      const hostConnection = this.hostConn || this.baseConn;
+      if (hostConnection && hostConnection.open) {
+        try {
+          hostConnection.send(stateMessage);
+          totalSent++;
+        } catch (error) {
+          totalFailed++;
+        }
+      } else {
+        totalFailed++;
+      }
     }
   },
   
