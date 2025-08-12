@@ -969,10 +969,10 @@ const Network = {
 
   // --- RATE LIMITED & STAGGERED PLAYER/AI STATE SYNCHRONIZATION ---
   _lastPlayerStateSent: 0,
-  _playerStateInterval: 50, // ms (20 times/sec)
+  _playerStateInterval: 30, // ms (33 times/sec, more frequent)
   _lastAIStateSent: 0,
-  _aiStateInterval: 50, // ms (20 times/sec)
-  _staggerOffset: 25, // ms (player/AI offset)
+  _aiStateInterval: 50, // ms (20 times/sec, keep AI stable)
+  _staggerOffset: 15, // ms (player/AI offset, matches new player interval)
 
   // Send player state to all connected peers, rate limited and staggered
   broadcastPlayerState(playerState) {
