@@ -454,12 +454,12 @@ export class TerrainPlane {
         geometry.setIndex(indices);
         geometry.computeVertexNormals();
         
-        // Create cartoony water material with sparkles and enhanced effects
+        // Create solid terrain material (no transparency)
         const material = new THREE.MeshLambertMaterial({
             color: 0x0088ff, // Brighter, more vibrant blue for cartoon style
-            transparent: true,
-            opacity: 0.6, // More transparent to show depth layers underneath
-            side: THREE.DoubleSide,
+            transparent: false,
+            opacity: 1.0, // Fully opaque
+            side: THREE.FrontSide, // Only render front faces
             wireframe: false, // Solid surface
             // Enhanced cartoon water appearance with sparkles
             emissive: 0x002266, // Stronger blue glow for magical effect
@@ -536,6 +536,9 @@ export class TerrainPlane {
         
         // Cartoony water surface effects with regional personality and sparkles
         if (this.landscapeWireframe.material) {
+            // Force terrain to be solid every frame
+            this.landscapeWireframe.material.transparent = false;
+            this.landscapeWireframe.material.opacity = 1.0;
             // Apply personality-based modifiers
             const personalityMod = this.oceanPersonality;
             const sparkleIntensity = (Math.sin(this.wavePhase * 3.0) * 0.4 + 0.6) * personalityMod.sparkleRate;

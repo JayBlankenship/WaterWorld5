@@ -200,9 +200,9 @@ export class UnifiedTerrain {
         
         const material = new THREE.MeshLambertMaterial({
             vertexColors: true,
-            transparent: true,
-            opacity: 0.75, // Slightly more transparent for consistency
-            side: THREE.DoubleSide,
+            transparent: false,
+            opacity: 1.0, // Fully opaque
+            side: THREE.BackSide,
             wireframe: false,
             // Enhanced cartoon underwater terrain with sparkles
             emissive: 0x001144, // Magical underwater glow
