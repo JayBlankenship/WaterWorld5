@@ -1006,6 +1006,7 @@ export class UnifiedTerrain {
     
     animateTerrainChunks() {
         for (const [chunkKey, chunk] of this.terrainChunks) {
+            if (!chunk || !chunk.mesh || !chunk.mesh.geometry || !chunk.mesh.geometry.attributes.position || !chunk.mesh.geometry.attributes.color) continue;
             const positions = chunk.mesh.geometry.attributes.position;
             const colors = chunk.mesh.geometry.attributes.color;
             const posArray = positions.array;
