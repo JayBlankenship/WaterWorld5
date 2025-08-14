@@ -152,20 +152,36 @@ export class UnifiedTerrain {
                     // Height-based coloring to match provided images
                     // Deep water: dark blue, shallow water: blue, low land: green, high land: light gray/white
                     let r, g, b;
-                    if (height < 25.5) {
-                        r = 0.8; g = 0.8; b = 0.8;// #665f00ff
-                    } else if (height < 28.2) {
-                        // Shallow water
-                        r = 0.0; g = 0.4; b = 0.0; // #0066cc
-                    } else if (height < 39.0) {
-                        // Low land
-                        r = 0.2; g = 0.6; b = 0.2; // #339933
-                    } else if (height < 45.0) {
-                        // Mid land
+                    if (height < 0) {
+                        // Deep sand - light gray (#cccccc)
+                        r = 0.71; g = 0.69; b = 0.51; // #cccccc
+                    }else if (height < 8) {
+                        // Deep sand - light gray (#cccccc)
                         r = 0.8; g = 0.8; b = 0.7; // #cccccc
+                    } else if (height < 15) {
+                        // Deep sand - tan brown (#8c7a52)
+                        r = 0.55; g = 0.48; b = 0.32; // #8c7a52
+                    } else if (height < 22) {
+                        // Deep water - beige (#dfdcb9ff)
+                        r = 0.8; g = 0.8; b = 0.7; // #b6b181ff
+                    } else if (height < 25.5) {
+                        // Shallow water - pale green (#d4dfadff)
+                        r = 0.8; g = 0.8; b = 0.7; // #d4dfadff
+                    } else if (height < 31.2) {
+                        // Shoreline - greenish blue (#00804d)
+                        r = 0.0; g = 0.5; b = 0.3; // #00804d
+                    } else if (height < 42.0) {
+                        // Low land - green (#339933)
+                        r = 0.2; g = 0.6; b = 0.2; // #339933
+                    } else if (height < 47.0) {
+                        // Mid land - gray brown (#807575ff)
+                        r = 0.8; g = 0.8; b = 0.7; // #807575ff
+                    } else if (height < 50.0) {
+                        // High land (peaks) - off white (#575050ff)
+                        r = 1.0; g = 1.0; b = 1.0; // #575050ff
                     } else {
-                        // High land (peaks)
-                        r = 1.0; g = 1.0; b = 1.0; // #ffffff
+                        // High land (peaks) - light gray (#6d6161ff)
+                        r = 1.0; g = 1.0; b = 1.0; // #6d6161ff
                     }
                     colors.push(r, g, b);
             }
