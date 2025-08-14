@@ -1,5 +1,24 @@
 // networkWorker.js - PeerJS worker for namespaced matchmaking and lobby system
+
+// === MESSAGE PROTOCOL DEFINITION ===
+// All communication between worker and main thread uses these types:
+// { type: 'playerInput', data: { ... } }
+// { type: 'gameStateUpdate', data: { ... } }
+// { type: 'connectionStatus', data: { status: 'connected'|'disconnected'|'reconnecting', details } }
+// { type: 'chatMessage', data: { ... } }
+// { type: 'diagnostic', data: { ... } }
+// { type: 'heartbeat', data: { timestamp } }
+// { type: 'peerEvent', data: { event, peerId } }
+// { type: 'error', data: { errorType, details } }
+
 importScripts('lib/peerjs.min.js');
+
+// Heartbeat/keepalive logic
+let heartbeatInterval = 3000; // ms
+setInterval(() => {
+  postMessage({ type: 'heartbeat', data: { timestamp: Date.now() } });
+  // TODO: Send heartbeat to peers
+}, heartbeatInterval);
 
 let peer = null;
 let basePeer = null;

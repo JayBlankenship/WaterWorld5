@@ -415,7 +415,7 @@ function initGame() {
             const key = e.key.toLowerCase();
 
             // Global hotkeys
-            if (key === 'escape') {
+            if (key === 'escape' || key === 'n') {
                 isGamePaused = !isGamePaused;
                 pauseMenu.style.display = isGamePaused ? 'block' : 'none';
                 if (isGamePaused && isPointerLocked) {
@@ -982,6 +982,13 @@ function initGame() {
                             window.aiPlayers.forEach(aiPawn => scene.remove(aiPawn));
                             window.aiPlayers.length = 0;
                             if (aiSendTimeout) clearTimeout(aiSendTimeout);
+                            // --- HANDSHAKE: Send 'client_ready' to host after AI sync ---
+                            setTimeout(() => {
+                                if (window.Network.hostConn && window.Network.hostConn.open) {
+                                    window.Network.hostConn.send({ type: 'client_ready', peerId: window.Network.myPeerId });
+                                    console.log('[CLIENT] Sent client_ready to host after AI sync');
+                                }
+                            }, 500); // Short delay after AI sync
                         }
                     }
                 });

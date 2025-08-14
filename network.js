@@ -144,18 +144,14 @@ const Network = {
               if (this.lobbyConnectedPeers.length === this.LOBBY_SIZE) {
                 // Mark lobby as full to prevent more joins
                 this.lobbyFull = true;
-                
                 if (this.callbacks.logChainEvent) {
                   this.callbacks.logChainEvent(`[Host] Lobby full! ${this.LOBBY_SIZE} players total: ${this.lobbyConnectedPeers.join(', ')}`);
                   this.callbacks.logChainEvent(`[Host] This includes: 1 host + ${this.lobbyConnectedPeers.length - 1} clients`);
                 }
-                
                 // Base becomes the permanent host - store all client connections
                 this.lobbyPeers = this.lobbyConnectedPeers.slice(1); // All clients except host
                 this.partnerConnections = { ...this.lobbyPeerConnections }; // Store all client connections
                 this.paired = true;
-                
-
                 // Notify all clients that the lobby is ready and send the host's terrain seed
                 const hostTerrainSeed = window.globalTerrainSeed || (window.terrainGenerator && window.terrainGenerator.unifiedTerrain && window.terrainGenerator.unifiedTerrain.terrainSeed);
                 for (let i = 1; i < this.lobbyConnectedPeers.length; i++) {
@@ -174,7 +170,6 @@ const Network = {
                     }
                   }
                 }
-                
                 if (this.callbacks.updateConnectionStatus) {
                   this.callbacks.updateConnectionStatus(`Hosting ${this.LOBBY_SIZE}-player lobby! (1 host + ${this.lobbyConnectedPeers.length - 1} clients)`);
                 }
@@ -184,19 +179,31 @@ const Network = {
                 if (this.callbacks.updateUI) {
                   this.callbacks.updateUI();
                 }
-                
-                // Now that lobby is full, release the BASE_PEER_ID so others can start new lobbies
-                // BUT keep a reference to prevent premature garbage collection
-                if (this.callbacks.logChainEvent) {
-                  this.callbacks.logChainEvent(`[Host] Lobby complete, allowing new lobbies to form`);
-                }
-                // Delay the basePeer destruction to ensure stability
-                setTimeout(() => {
-                  if (this.basePeer) {
-                    this.basePeer.destroy(); // Release the BASE_PEER_ID for others to use
-                    this.basePeer = null;
+                // --- HANDSHAKE: Wait for all clients to send 'client_ready' before destroying BASE_PEER_ID ---
+                this._clientReadyAcks = this._clientReadyAcks || new Set();
+                for (let i = 1; i < this.lobbyConnectedPeers.length; i++) {
+                  const peerId = this.lobbyConnectedPeers[i];
+                  if (this.lobbyPeerConnections[peerId]) {
+                    this.lobbyPeerConnections[peerId].on('data', (data) => {
+                      if (data && data.type === 'client_ready') {
+                        this._clientReadyAcks.add(peerId);
+                        if (this.callbacks.logChainEvent) {
+                          this.callbacks.logChainEvent(`[Host] Received client_ready from ${peerId}`);
+                        }
+                        // If all clients have sent 'client_ready', destroy BASE_PEER_ID
+                        if (this._clientReadyAcks.size === this.lobbyConnectedPeers.length - 1) {
+                          if (this.callbacks.logChainEvent) {
+                            this.callbacks.logChainEvent(`[Host] All clients ready, releasing BASE_PEER_ID`);
+                          }
+                          if (this.basePeer) {
+                            this.basePeer.destroy();
+                            this.basePeer = null;
+                          }
+                        }
+                      }
+                    });
                   }
-                }, 5000); // Wait 5 seconds to ensure all connections are stable
+                }
               } else {
                 // Not enough players yet, send waiting notification
                 conn.send({ 
