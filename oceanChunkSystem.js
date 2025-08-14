@@ -5,9 +5,9 @@ export class OceanChunkSystem {
         this.scene = scene;
         
         // Ocean chunk parameters
-        this.chunkSize = 200; // Size of each ocean chunk (matches terrain)
+    this.chunkSize = 400; // Size of each ocean chunk (doubled for 2x ocean)
         this.chunkResolution = 32; // Reduced resolution for better performance (32x32 vertices)
-        this.renderDistance = 1600; // Slightly reduced render distance
+    this.renderDistance = 3200; // Doubled render distance for 2x ocean
         this.oceanChunks = new Map(); // Store ocean chunks by key "x,z"
         
         // Ocean wave parameters (matches shipPawn.js ocean function)

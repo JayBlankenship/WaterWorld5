@@ -83,39 +83,7 @@ export class UnifiedTerrain {
     }
     
     createOceanSurface() {
-        // Create a very large stationary ocean surface
-        const surfaceSize = 8000; // Much larger than render distance (doubled from 4000)
-        const surfaceGeometry = new THREE.PlaneGeometry(surfaceSize, surfaceSize, 128, 128);
-        
-        // Create cartoon water material with magical sparkles
-        const surfaceMaterial = new THREE.MeshLambertMaterial({
-            color: 0x0099ff, // Brighter cartoon blue
-            transparent: true,
-            opacity: 0.6, // More transparent for magical effect
-            side: THREE.DoubleSide,
-            wireframe: false,
-            // Enhanced cartoon water surface with sparkles
-            emissive: 0x003366, // Magical blue-green glow
-            emissiveIntensity: 0.18 // Higher intensity for sparkles
-        });
-        
-        this.oceanSurface = new THREE.Mesh(surfaceGeometry, surfaceMaterial);
-        this.oceanSurface.rotation.x = -Math.PI / 2; // Rotate to be horizontal
-        this.oceanSurface.position.y = -2.3; // Position just above the terrain base (terrain base is at -2.5 + rocky height variations)
-        this.oceanSurface.position.x = 0; // Fixed position
-        this.oceanSurface.position.z = 0; // Fixed position
-        this.scene.add(this.oceanSurface);
-        
-        // Store original surface vertices for animation
-        this.originalSurfaceVertices = [];
-        const surfacePositions = this.oceanSurface.geometry.attributes.position.array;
-        for (let i = 0; i < surfacePositions.length; i += 3) {
-            this.originalSurfaceVertices.push({
-                x: surfacePositions[i],
-                y: surfacePositions[i + 1],
-                z: surfacePositions[i + 2]
-            });
-        }
+    // Ocean surface mesh removed; using wiremesh ocean system instead
     }
     
     createTerrainChunk(chunkX, chunkZ) {
