@@ -149,34 +149,25 @@ export class UnifiedTerrain {
 
                 vertices.push(px, height, pz);
 
-                // Generate color based on height for depth visualization
-                const normalizedHeight = (height + 6) / 12;
-                const clampedHeight = Math.max(0, Math.min(1, normalizedHeight));
-
-                let r, g, b;
-                if (clampedHeight < 0.25) {
-                    const t = clampedHeight * 4;
-                    r = 0;
-                    g = t * 0.3;
-                    b = 0.4 + t * 0.6;
-                } else if (clampedHeight < 0.5) {
-                    const t = (clampedHeight - 0.25) * 4;
-                    r = 0;
-                    g = 0.3 + t * 0.7;
-                    b = 1.0 - t * 0.5;
-                } else if (clampedHeight < 0.75) {
-                    const t = (clampedHeight - 0.5) * 4;
-                    r = t * 0.8;
-                    g = 1.0;
-                    b = 0.5 - t * 0.5;
-                } else {
-                    const t = (clampedHeight - 0.75) * 4;
-                    r = 0.8 + t * 0.2;
-                    g = 1.0 - t * 0.5;
-                    b = 0;
-                }
-
-                colors.push(r, g, b);
+                    // Height-based coloring to match provided images
+                    // Deep water: dark blue, shallow water: blue, low land: green, high land: light gray/white
+                    let r, g, b;
+                    if (height < 25.5) {
+                        r = 0.8; g = 0.8; b = 0.8;// #665f00ff
+                    } else if (height < 28.2) {
+                        // Shallow water
+                        r = 0.0; g = 0.4; b = 0.0; // #0066cc
+                    } else if (height < 39.0) {
+                        // Low land
+                        r = 0.2; g = 0.6; b = 0.2; // #339933
+                    } else if (height < 45.0) {
+                        // Mid land
+                        r = 0.8; g = 0.8; b = 0.7; // #cccccc
+                    } else {
+                        // High land (peaks)
+                        r = 1.0; g = 1.0; b = 1.0; // #ffffff
+                    }
+                    colors.push(r, g, b);
             }
         }
         
@@ -1040,29 +1031,9 @@ export class UnifiedTerrain {
                 let waveHeight = 0;
                 waveHeight += Math.sin(x * this.waveFreq + z * this.waveFreq + this.wavePhase) * this.waveAmp;
                 waveHeight += Math.cos(x * this.waveFreq * 1.3 + this.wavePhase * 1.2) * this.waveAmp * 0.6;
-                // Apply final height
+                // Apply final height only
                 const finalHeight = baseHeight + waveHeight;
                 posArray[vertexIndex] = finalHeight;
-                // Update color based on height
-                const normalizedHeight = (finalHeight + 6) / 12;
-                const clampedHeight = Math.max(0, Math.min(1, normalizedHeight));
-                let r, g, b;
-                if (clampedHeight < 0.25) {
-                    const t = clampedHeight * 4;
-                    r = 0; g = t * 0.3; b = 0.4 + t * 0.6;
-                } else if (clampedHeight < 0.5) {
-                    const t = (clampedHeight - 0.25) * 4;
-                    r = 0; g = 0.3 + t * 0.7; b = 1.0 - t * 0.5;
-                } else if (clampedHeight < 0.75) {
-                    const t = (clampedHeight - 0.5) * 4;
-                    r = t * 0.8; g = 1.0; b = 0.5 - t * 0.5;
-                } else {
-                    const t = (clampedHeight - 0.75) * 4;
-                    r = 0.8 + t * 0.2; g = 1.0 - t * 0.5; b = 0;
-                }
-                colorArray[colorIndex] = r;
-                colorArray[colorIndex + 1] = g;
-                colorArray[colorIndex + 2] = b;
             }
             positions.needsUpdate = true;
             colors.needsUpdate = true;
@@ -1118,52 +1089,7 @@ export class UnifiedTerrain {
                 }
             }
             
-            // Apply final height
-            const finalHeight = baseHeight + waveHeight;
-            posArray[vertexIndex] = finalHeight;
             
-            // Update color based on new height for dynamic depth visualization
-            const normalizedHeight = (finalHeight + 6) / 12; // Normalize height range (-6 to 6) to (0 to 1)
-            const clampedHeight = Math.max(0, Math.min(1, normalizedHeight));
-            
-            // Color gradient: deep blue -> green -> yellow -> red
-            let r, g, b;
-            if (clampedHeight < 0.25) {
-                // Deep areas: dark blue to blue
-                const t = clampedHeight * 4;
-                r = 0;
-                g = t * 0.3;
-                b = 0.4 + t * 0.6;
-            } else if (clampedHeight < 0.5) {
-                // Mid-deep areas: blue to cyan/green
-                const t = (clampedHeight - 0.25) * 4;
-                r = 0;
-                g = 0.3 + t * 0.7;
-                b = 1.0 - t * 0.5;
-            } else if (clampedHeight < 0.75) {
-                // Mid areas: green to yellow
-                const t = (clampedHeight - 0.5) * 4;
-                r = t * 0.8;
-                g = 1.0;
-                b = 0.5 - t * 0.5;
-            } else {
-                // High areas: yellow to red
-                const t = (clampedHeight - 0.75) * 4;
-                r = 0.8 + t * 0.2;
-                g = 1.0 - t * 0.5;
-                b = 0;
-            }
-            
-            // Add storm color effects
-            if (stormIntensity > 0) {
-                const stormTint = stormIntensity * 0.3;
-                r = Math.min(1.0, r + stormTint); // Add red tint during storms
-                g = Math.max(0, g - stormTint * 0.5); // Reduce green
-            }
-            
-            colorArray[colorIndex] = r;
-            colorArray[colorIndex + 1] = g;
-            colorArray[colorIndex + 2] = b;
         }
         
         positions.needsUpdate = true;
