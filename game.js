@@ -33,6 +33,7 @@ const closeMenuButton = document.getElementById('closeMenu');
 const instructions = document.getElementById('instructions');
 const thetaSensitivityInput = document.getElementById('thetaSensitivity');
 const phiSensitivityInput = document.getElementById('phiSensitivity');
+const loadingScreen = document.getElementById('loadingScreen');
 
 // Global state
 let isInstructionsVisible = true;
@@ -50,9 +51,22 @@ window.resumeGame = function() {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Update button and loading screen colors to pirate gold
+    startButton.style.color = '#FFD700';
+    startButton.style.borderColor = '#FFD700';
+    startButton.style.textShadow = '0 0 8px #FFD700';
+    startButton.style.boxShadow = '0 0 20px #FFD700';
     startButton.addEventListener('click', () => {
         startButton.style.display = 'none';
         canvas.style.display = 'block';
+        loadingScreen.style.display = 'flex';
+        // If loading text exists, update it to pirate gold
+        const loadingText = loadingScreen.querySelector('div');
+        if (loadingText) {
+            loadingText.textContent = 'Loading Open Waters...';
+            loadingText.style.color = '#FFD700';
+            loadingText.style.textShadow = '0 0 16px #FFD700';
+        }
         initGame();
     });
 });
@@ -104,6 +118,8 @@ function initGame() {
     let hostedClientAIPlayers = [];
     createShipPawn(false, null, false, (playerPawn) => {
         scene.add(playerPawn);
+        // Remove loading screen when player pawn is created
+        if (loadingScreen) loadingScreen.style.display = 'none';
 
         // Initialize networked player manager for multiplayer replication
         const networkedPlayerManager = new NetworkedPlayerManager(scene);

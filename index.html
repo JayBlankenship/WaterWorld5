@@ -9,7 +9,7 @@
             margin: 0; 
             background: #000; 
             overflow: hidden; 
-            color: #00ff00;
+            color: #FFD700;
             font-family: 'Consolas', 'Courier New', monospace;
         }
         
@@ -19,22 +19,22 @@
             left: 50%; 
             transform: translate(-50%, -50%); 
             background: #000;
-            color: #00ff00;
-            border: 2px solid #00ff00;
+            color: #FFD700;
+            border: 2px solid #FFD700;
             font-family: 'Consolas', 'Courier New', monospace;
             padding: 20px 40px; 
             font-size: 24px; 
             cursor: pointer;
             border-radius: 8px;
-            text-shadow: 0 0 8px #00ff00;
-            box-shadow: 0 0 20px #00ff00;
+            text-shadow: 0 0 8px #FFD700;
+            box-shadow: 0 0 20px #FFD700;
             transition: all 0.3s;
         }
         
         #startButton:hover {
-            background: #00ff00;
+            background: #FFD700;
             color: #000;
-            box-shadow: 0 0 30px #00ff00;
+            box-shadow: 0 0 30px #FFD700;
         }
         
         #gameCanvas { 
@@ -50,19 +50,19 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: rgba(0, 26, 0, 0.95);
-            color: #00ff00;
-            border: 2px solid #00ff00;
+            color: #FFD700;
+            border: 2px solid #FFD700;
             padding: 20px;
             border-radius: 12px;
             z-index: 10;
-            box-shadow: 0 0 20px #00ff00;
+            box-shadow: 0 0 20px #FFD700;
             font-family: 'Consolas', 'Courier New', monospace;
         }
         
         #menu h2 { 
             margin-top: 0; 
-            color: #00ff99;
-            text-shadow: 0 0 8px #00ff00;
+            color: #FFD700;
+            text-shadow: 0 0 8px #FFD700;
             font-size: 1.4em;
             letter-spacing: 2px;
         }
@@ -73,7 +73,7 @@
         
         .menu-item label { 
             margin-right: 10px; 
-            color: #00ff99;
+            color: #FFD700;
             font-weight: bold;
             display: block;
             margin-bottom: 5px;
@@ -82,14 +82,14 @@
         .menu-item input[type="range"] { 
             width: 300px;
             background: #000;
-            border: 1px solid #00ff00;
+            border: 1px solid #FFD700;
             border-radius: 4px;
         }
         
         #closeMenu {
             background: #000;
-            color: #00ff00;
-            border: 1px solid #00ff00;
+            color: #FFD700;
+            border: 1px solid #FFD700;
             font-family: 'Consolas', 'Courier New', monospace;
             padding: 8px 16px;
             border-radius: 4px;
@@ -99,7 +99,7 @@
         }
         
         #closeMenu:hover {
-            background: #00ff00;
+            background: #FFD700;
             color: #000;
         }
         
@@ -109,9 +109,9 @@
             top: 10px;
             left: 10px;
             background: rgba(0, 26, 0, 0.8);
-            color: #00ff00;
+            color: #FFD700;
             padding: 15px;
-            border: 1px solid #00ff00;
+            border: 1px solid #FFD700;
             border-radius: 6px;
             font-size: 14px;
             z-index: 5;
@@ -281,7 +281,11 @@
     </style>
 </head>
 <body>
-    <button id="startButton">Start Neon Game</button>
+    <div id="loadingScreen" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;">
+        <img src="lib/TheBuccaneers_FJWaugh_loadingscreen.jpg" alt="Loading..." style="width:60vw;max-width:900px;filter:brightness(1.1) drop-shadow(0 0 40px #FFD700);border-radius:24px;object-fit:cover;">
+        <div style="color:#FFD700;font-size:2em;margin-top:32px;text-shadow:0 0 16px #FFD700;">Loading Open Waters...</div>
+    </div>
+    <button id="startButton">Open Waters</button>
     <canvas id="gameCanvas"></canvas>
     
     <!-- Instructions overlay -->
