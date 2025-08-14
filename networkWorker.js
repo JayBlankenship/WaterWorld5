@@ -35,7 +35,7 @@ function post(type, data) {
 }
 
 onmessage = function(event) {
-  const { type, lobbySize, data } = event.data;
+  const { type, lobbySize } = event.data;
   if (type === 'init') {
     LOBBY_SIZE = lobbySize || LOBBY_SIZE;
     myPeerId = `ChainNode-${Math.random().toString(36).substr(2, 8)}`;
@@ -44,57 +44,15 @@ onmessage = function(event) {
       config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
     });
     peer.on('open', (id) => {
-      post('connectionStatus', { status: 'connected', details: { peerId: id } });
-      post('diagnostic', { message: `[Worker] Peer opened with ID: ${id}` });
+      post('updateConnectionStatus', `Connected as ${id}`);
+      post('logChainEvent', `[Worker] Peer opened with ID: ${id}`);
+      post('updateUI');
       tryBecomeBase();
     });
     peer.on('error', (err) => {
-      post('error', { errorType: 'peer', details: err.message });
-      post('connectionStatus', { status: 'error', details: { error: err.message } });
+      post('logChainEvent', `[Worker] Peer error: ${err.message}`);
+      post('updateConnectionStatus', `Peer error: ${err.message}`);
     });
-    peer.on('disconnected', () => {
-      post('connectionStatus', { status: 'disconnected', details: { peerId: myPeerId } });
-    });
-    peer.on('close', () => {
-      post('connectionStatus', { status: 'closed', details: { peerId: myPeerId } });
-    });
-    peer.on('connection', (conn) => {
-      conn.on('data', (data) => {
-        // Handle incoming data from peers (player/AI state, chat, etc.)
-        if (data.type === 'playerState') {
-          post('gameStateUpdate', { peerId: conn.peer, state: data.state });
-        } else if (data.type === 'chatMessage') {
-          post('chatMessage', { peerId: conn.peer, message: data.message });
-        } else {
-          post('diagnostic', { message: `[Worker] Received data: ${JSON.stringify(data)}` });
-        }
-      });
-      conn.on('error', (err) => {
-        post('error', { errorType: 'conn', details: err.message });
-      });
-      conn.on('close', () => {
-        post('peerEvent', { event: 'close', peerId: conn.peer });
-      });
-    });
-  }
-  // Handle player input from main thread
-  if (type === 'playerInput') {
-    // Broadcast player input/state to all connected peers
-    for (const peerId in lobbyPeerConnections) {
-      const conn = lobbyPeerConnections[peerId];
-      if (conn && conn.open) {
-        conn.send({ type: 'playerState', state: data });
-      }
-    }
-  }
-  // Handle chat messages from main thread
-  if (type === 'chatMessage') {
-    for (const peerId in lobbyPeerConnections) {
-      const conn = lobbyPeerConnections[peerId];
-      if (conn && conn.open) {
-        conn.send({ type: 'chatMessage', message: data });
-      }
-    }
   }
 };
 
