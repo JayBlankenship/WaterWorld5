@@ -33,7 +33,7 @@ export class UnifiedTerrain {
         this.terrainChunks = new Map(); // Store terrain chunks by key "x,z"
         this.chunkSize = 200; // Size of each terrain chunk
         this.chunkResolution = 32; // Resolution per chunk
-        this.renderDistance = 1600; // How far to generate chunks (doubled from 800)
+        this.renderDistance = 3200; // How far to generate chunks (doubled from 800)
 
         // Ocean surface
         this.oceanSurface = null;
@@ -152,7 +152,13 @@ export class UnifiedTerrain {
                     // Height-based coloring to match provided images
                     // Deep water: dark blue, shallow water: blue, low land: green, high land: light gray/white
                     let r, g, b;
-                    if (height < 0) {
+                    if (height < -15) {
+                        // Deep sand - light gray (#cccccc)
+                        r = 0.81; g = 0.80; b = 0.60; // #cfdf98ff
+                    }else if (height < -5) {
+                        // Deep sand - light gray (#cccccc)
+                        r = 0.81; g = 0.87; b = 0.60; // #cfdf98ff
+                    }else if (height < 0) {
                         // Deep sand - light gray (#cccccc)
                         r = 0.71; g = 0.69; b = 0.51; // #cccccc
                     }else if (height < 8) {
@@ -178,10 +184,10 @@ export class UnifiedTerrain {
                         r = 0.8; g = 0.8; b = 0.7; // #807575ff
                     } else if (height < 50.0) {
                         // High land (peaks) - off white (#575050ff)
-                        r = 1.0; g = 1.0; b = 1.0; // #575050ff
+                        r = 1.0; g = 1.0; b = 0.9; // #575050ff
                     } else {
                         // High land (peaks) - light gray (#6d6161ff)
-                        r = 1.0; g = 1.0; b = 1.0; // #6d6161ff
+                        r = 1.0; g = 1.0; b = 0.9; // #6d6161ff
                     }
                     colors.push(r, g, b);
             }
